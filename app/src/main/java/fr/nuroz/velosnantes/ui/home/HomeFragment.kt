@@ -2,21 +2,25 @@ package fr.nuroz.velosnantes.ui.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.switchMap
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import fr.nuroz.velosnantes.adapter.StationAdapter
 import fr.nuroz.velosnantes.api.RetrofitHelper
 import fr.nuroz.velosnantes.api.StationApi
 import fr.nuroz.velosnantes.databinding.FragmentHomeBinding
+import fr.nuroz.velosnantes.model.Station
 import fr.nuroz.velosnantes.model.allStations
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.reflect.typeOf
 
 class HomeFragment : Fragment() {
 
@@ -25,6 +29,29 @@ private var _binding: FragmentHomeBinding? = null
   // This property is only valid between onCreateView and
   // onDestroyView.
   private val binding get() = _binding!!
+
+  val stationApi = RetrofitHelper().getInstance().create(StationApi::class.java)
+  var bikeLoadingProgresBar : ProgressBar? = null
+
+  fun changeStatusStation(station : Station) {
+    bikeLoadingProgresBar!!.visibility = (View.VISIBLE)
+    GlobalScope.launch {
+      val result = stationApi.changeStatus(station.id)
+
+      if(result.code() == 200) {
+        loadStations()
+        bikeLoadingProgresBar!!.visibility = (View.INVISIBLE)
+      }
+    }
+  }
+
+  fun loadStations() {
+    GlobalScope.launch {
+      val result = stationApi.getStations()
+      homeViewModel.stations.postValue(result.body())
+      bikeLoadingProgresBar!!.setVisibility(View.INVISIBLE);
+    }
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -37,7 +64,7 @@ private var _binding: FragmentHomeBinding? = null
     _binding = FragmentHomeBinding.inflate(inflater, container, false)
     val root: View = binding.root
 
-    val bikeLoadingProgresBar = binding.bikeLoadingProgresBar
+    bikeLoadingProgresBar = binding.bikeLoadingProgresBar
     val showAllStationBtn = binding.showAllStationBtn
 
     showAllStationBtn.setOnClickListener { it ->
@@ -48,17 +75,11 @@ private var _binding: FragmentHomeBinding? = null
 
     val recyclerView: RecyclerView = binding.recyclerView
     homeViewModel.stations.observe(viewLifecycleOwner, {
-      val adapter = StationAdapter(it, requireContext())
+      val adapter = StationAdapter(it, requireContext(), this)
       recyclerView.layoutManager = LinearLayoutManager(requireContext())
       recyclerView.adapter = adapter
     })
-
-    val stationApi = RetrofitHelper().getInstance().create(StationApi::class.java)
-    GlobalScope.launch {
-      val result = stationApi.getStations()
-      homeViewModel.stations.postValue(result.body())
-      bikeLoadingProgresBar.setVisibility(View.INVISIBLE);
-    }
+    loadStations()
 
     return root
   }

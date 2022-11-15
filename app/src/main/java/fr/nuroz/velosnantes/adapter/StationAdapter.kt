@@ -1,22 +1,31 @@
 package fr.nuroz.velosnantes.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.Transformations
 import androidx.recyclerview.widget.RecyclerView
 import fr.nuroz.velosnantes.R
+import fr.nuroz.velosnantes.api.RetrofitHelper
+import fr.nuroz.velosnantes.api.StationApi
 import fr.nuroz.velosnantes.model.Station
+import fr.nuroz.velosnantes.model.allStations
 import fr.nuroz.velosnantes.model.currentLocation
 import fr.nuroz.velosnantes.model.stationSelected
+import fr.nuroz.velosnantes.ui.home.HomeFragment
 import fr.nuroz.velosnantes.ui.home.MapsActivity
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.math.round
 
-class StationAdapter(private val stations:List<Station>, private val ctx : Context) : RecyclerView.Adapter<StationAdapter.ViewHolder>() {
+class StationAdapter(private val stations:List<Station>, private val ctx : Context, private val framgent: HomeFragment) : RecyclerView.Adapter<StationAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardView : CardView = itemView.findViewById(R.id.cardViewPump)
@@ -34,7 +43,7 @@ class StationAdapter(private val stations:List<Station>, private val ctx : Conte
 
     // pour chaque viewItem on alimente la vue
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val station : Station = stations[position]
+        var station : Station = stations[position]
         holder.name.text = station.name
         holder.addresse.text = station.adresse
         holder.available.text = "\uD83D\uDEB2${station.availableBikes} \uD83D\uDCE3${station.availableBikeStands} ✅${station.bikeStands}"
@@ -48,6 +57,11 @@ class StationAdapter(private val stations:List<Station>, private val ctx : Conte
         } else {
             holder.status.setImageResource(R.drawable.ic_baseline_radio_button_unchecked_24)
         }
+
+        holder.status.setOnClickListener {
+            framgent.changeStatusStation(station)
+        }
+
         holder.cardView.setOnClickListener {
             val intent : Intent = Intent(ctx, MapsActivity::class.java)
             stationSelected = station
