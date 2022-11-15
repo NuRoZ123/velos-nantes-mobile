@@ -3,11 +3,13 @@ package fr.nuroz.velosnantes.ui.notifications
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import fr.nuroz.velosnantes.model.Parking
+import fr.nuroz.velosnantes.model.Pump
 
 class NotificationsViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is notifications Fragment"
+    private val _parkings = MutableLiveData<List<Parking>>().apply {
+        value = ArrayList()
     }
-    val text: LiveData<String> = _text
+    val parkings: MutableLiveData<List<Parking>> = _parkings
 }

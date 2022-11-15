@@ -58,7 +58,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.addMarker(MarkerOptions()
                 .position(position)
                 .title(pumpSelected!!.carburant + ": " + pumpSelected!!.prix + "€")
-                .icon(BitmapFromVector(applicationContext, R.drawable.ic_baseline_directions_bike_24)))
+                .icon(BitmapFromVector(applicationContext, R.drawable.ic_baseline_local_gas_station_24)))
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18F))
 
             pumpSelected = null;
@@ -69,17 +69,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 mMap.addMarker(MarkerOptions().position(stationLatLng).title(it.name))
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(stationLatLng, 12F))
             }
-
-          allStations = null;
+            allStations = null;
         }  else if(allPumps != null) {
-            val pumps : List<Pump> = allPumps!!
+           val pumps : List<Pump> = allPumps!!
             pumps.forEach {
                 val stationLatLng = LatLng(it.lattitude, it.longitude)
                 mMap.addMarker(MarkerOptions().position(stationLatLng).title(it.carburant + ": " + it.prix + "€"))
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(stationLatLng, 8F))
             }
 
-            allStations = null;
+            allPumps = null;
+        } else if(allParkings != null) {
+            val parkings : List<Parking> = allParkings!!
+            parkings.forEach {
+                val stationLatLng = LatLng(it.lattitude, it.longitude)
+                mMap.addMarker(MarkerOptions().position(stationLatLng).title(it.nom))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(stationLatLng, 13F))
+            }
+
+            allParkings = null;
+        } else if(parkingSelected != null) {
+            val position = LatLng(parkingSelected!!.lattitude, parkingSelected!!.longitude)
+            mMap.addMarker(MarkerOptions()
+                .position(position)
+                .title(parkingSelected!!.nom)
+                .icon(BitmapFromVector(applicationContext, R.drawable.ic_baseline_local_parking_24)))
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18F))
+
+            parkingSelected = null;
         } else {
             val position = LatLng(stationSelected!!.lattitude, stationSelected!!.longitude)
             mMap.addMarker(MarkerOptions()
@@ -93,10 +110,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if(currentLocation != null) {
             val currentLatLng = LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
-            mMap.addMarker(MarkerOptions())
+            mMap.addMarker(MarkerOptions()
                 .position(currentLatLng)
                 .title("You are here")
-                .icon(BitmapFromVector(applicationContext, R.drawable.ic_baseline_my_location_24))
+                .icon(BitmapFromVector(applicationContext, R.drawable.ic_baseline_my_location_24)))
         }
     }
 
@@ -130,8 +147,4 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // after generating our bitmap we are returning our bitmap.
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
-}
-
-private operator fun LatLng.invoke(currentLatLng: LatLng): Any {
-
 }

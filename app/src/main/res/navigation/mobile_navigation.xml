@@ -20,6 +20,6 @@
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="fr.nuroz.velosnantes.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
+        android:label="@string/title_parkings"
         tools:layout="@layout/fragment_notifications" />
 </navigation>
